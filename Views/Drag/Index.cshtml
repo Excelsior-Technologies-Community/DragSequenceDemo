@@ -1,0 +1,62 @@
+﻿@model IEnumerable<DragSequenceDemo.Models.Item>
+
+@{
+    ViewData["Title"] = "Reorder Items";
+}
+
+<h3 class="mb-3">🔀 Reorder Modules</h3>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light fw-semibold">
+        Drag & Drop to Change Order
+    </div>
+
+    <ul id="list" class="list-group list-group-flush">
+        @foreach (var i in Model.OrderBy(x => x.Sequence))
+        {
+            <li class="list-group-item d-flex align-items-center"
+                data-id="@i.Id">
+
+                <span class="me-3 text-muted drag-handle" style="cursor:grab;">
+                    ☰
+                </span>
+
+                <div class="flex-grow-1">
+                    <strong>@i.Name</strong>
+                </div>
+
+                <span class="badge bg-secondary">
+                    Seq: @i.Sequence
+                </span>
+            </li>
+        }
+    </ul>
+</div>
+
+<div class="mt-3 text-muted small">
+    Order is saved automatically after drag.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+    const list = document.getElementById("list");
+
+    Sortable.create(list, {
+        animation: 150,
+        handle: ".drag-handle",
+        onEnd() {
+
+            const ids = [...list.children]
+                .map(x => parseInt(x.dataset.id));
+
+            fetch("/Drag/SaveOrder", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(ids)
+            });
+        }
+    });
+</script>
